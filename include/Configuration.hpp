@@ -22,10 +22,6 @@ struct Configuration
     /* Game mode 3 -- Misfortune: One of the player's catcher/paddle's height will be reduced by half. Who's the (un)lucky one? */
     bool gameModes[4] = {false, false, false, false};
 
-    // bool gameMode0 = false;
-    // bool gameMode1 = false;
-    // bool gameMode2 = false;
-    // bool gameMode3 = false;
 };
 
 #endif

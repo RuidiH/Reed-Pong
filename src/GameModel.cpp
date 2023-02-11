@@ -1,5 +1,7 @@
 #include "GameModel.hpp"
 
+// GameMode Constructor
+
 GameModel::GameModel(int w, int h) : _window_width(w), _window_height(h)
 {
     bool success = true;
@@ -105,13 +107,4 @@ void GameModel::Run()
         // clear render
         SDL_RenderClear(_renderer);
     }
-
-    // _menu.Init(_window, _renderer, _font, _window_width, _window_height, _config);
-    // _menu.Loop();
-
-    // // clear render
-    // SDL_RenderClear(_renderer);
-
-    // _pong.Init(_window, _renderer, _font, _window_width, _window_height, _config);
-    // _pong.Loop();
 }

@@ -2,6 +2,7 @@
 
 Menu::~Menu()
 {
+    // no need to free anything yet.
 }
 
 void Menu::Init(SDL_Window *window,
@@ -38,7 +39,7 @@ void Menu::Init(SDL_Window *window,
     _option1Box.y = _titleContainer.y + 275;
     _option1Box.w = _width / 4;
     _option1Box.h = 150;
-    
+
     // copyright box
     _copyrightBox.x = 0;
     _copyrightBox.y = _height - 30;
@@ -90,118 +91,119 @@ void Menu::Init(SDL_Window *window,
     }
 }
 
-    void Menu::Loop()
+void Menu::Loop()
+{
+    bool quit = false;
+
+    SDL_Event e;
+
+    SDL_StartTextInput();
+
+    time_t prev = SDL_GetTicks();
+    while (!quit)
     {
-        bool quit = false;
+        SDL_Point mousePosition;
 
-        SDL_Event e;
-
-        SDL_StartTextInput();
-
-        time_t prev = SDL_GetTicks();
-        while (!quit)
+        while (SDL_PollEvent(&e) != 0)
         {
-            SDL_Point mousePosition;
-
-            while (SDL_PollEvent(&e) != 0)
+            mousePosition.x = e.motion.x;
+            mousePosition.y = e.motion.y;
+            // std::cout << mousePosition.x << " " << mousePosition.y << std::endl;
+            switch (e.type)
             {
-                mousePosition.x = e.motion.x;
-                mousePosition.y = e.motion.y;
-                // std::cout << mousePosition.x << " " << mousePosition.y << std::endl;
-                switch (e.type)
+            case SDL_QUIT:
+                _config->quitGame = true;
+                quit = true;
+                break;
+            case SDL_MOUSEBUTTONUP:
+                // TODO: Currently quit when option1Box is clicked. Implement code.
+                if (SDL_PointInRect(&mousePosition, &_option1Box))
                 {
-                case SDL_QUIT:
+                    quit = true;
+                    _config->page = 1;
+                }
+                for (Checkbox cbx : _checkbox)
+                {
+                    cbx.CheckClick(mousePosition);
+                }
+                break;
+            case SDL_KEYUP:
+                if (e.key.keysym.sym == SDLK_ESCAPE)
+                {
                     _config->quitGame = true;
                     quit = true;
-                    break;
-                case SDL_MOUSEBUTTONUP:
-                    // TODO: Currently quit when option1Box is clicked. Implement code.
-                    if (SDL_PointInRect(&mousePosition, &_option1Box))
-                    {
-                        quit = true;
-                        _config->page = 1;
-                    }
-                    for (Checkbox cbx: _checkbox) {
-                        cbx.CheckClick(mousePosition);
-                    }
-                    break;
-                case SDL_KEYUP:
-                    if (e.key.keysym.sym == SDLK_ESCAPE)
-                    {
-                        _config->quitGame = true;
-                        quit = true;
-                    }
-                    break;
                 }
+                break;
             }
-
-            Update();
-
-            _frameCap(prev);
-
-            Render();
         }
 
-        SDL_StopTextInput();
+        Update();
+
+        _frameCap(prev);
+
+        Render();
     }
 
-    void Menu::Update()
+    SDL_StopTextInput();
+}
+
+void Menu::Update()
+{
+    SDL_SetRenderDrawColor(_renderer, 0x22, 0x22, 0x22, 0xFF);
+    SDL_RenderClear(_renderer);
+}
+
+void Menu::Render()
+{
+    // Render title
+    SDL_RenderCopy(_renderer, _titleTexture, NULL, &_titleContainer);
+
+    // Render option box
+    SDL_SetRenderDrawColor(_renderer, 220, 220, 220, 255);
+    SDL_RenderFillRect(_renderer, &_option1Box);
+
+    // Render option
+    SDL_RenderCopy(_renderer, _option1Texture, NULL, &_option1Container);
+
+    // Render checkboxs
+    for (Checkbox cbx : _checkbox)
     {
-        // TODO:
-
-        SDL_SetRenderDrawColor(_renderer, 0x22, 0x22, 0x22, 0xFF);
-        SDL_RenderClear(_renderer);
+        cbx.Render(_renderer);
     }
 
-    void Menu::Render()
+    // Render copyright text
+    SDL_RenderCopy(_renderer, _copyrightTexture, NULL, &_copyrightBox);
+
+    SDL_RenderPresent(_renderer);
+}
+
+/** Private functions **/
+
+// Frame cap the game at 60fps
+void Menu::_frameCap(time_t &previous)
+{
+
+    time_t current = SDL_GetTicks();
+
+    float expectation = (float)(1.0 * 1000 / 60.0);
+    if (current - previous < expectation)
     {
-        // Render title
-        SDL_RenderCopy(_renderer, _titleTexture, NULL, &_titleContainer);
-
-        // Render option box
-        SDL_SetRenderDrawColor(_renderer, 220, 220, 220, 255);
-        SDL_RenderFillRect(_renderer, &_option1Box);
-
-        // Render option
-        SDL_RenderCopy(_renderer, _option1Texture, NULL, &_option1Container);
-
-        // Render checkboxs
-        for (Checkbox cbx : _checkbox) {
-            cbx.Render(_renderer);
-        }
-
-        // Render copyright text
-        SDL_RenderCopy(_renderer, _copyrightTexture, NULL, &_copyrightBox);
-
-        SDL_RenderPresent(_renderer);
+        SDL_Delay(expectation - (current - previous));
     }
 
-    /** Private functions **/
+    previous = current;
+}
 
-    void Menu::_frameCap(time_t & previous)
-    {
+void Menu::_updateFilledRect(SDL_Rect &rect, Dimension dim)
+{
+    rect.x = dim.x;
+    rect.y = dim.y;
+    rect.w = dim.w;
+    rect.h = dim.h;
+}
 
-        time_t current = SDL_GetTicks();
-
-        float expectation = (float)(1.0 * 1000 / 60.0);
-        if (current - previous < expectation)
-        {
-            SDL_Delay(expectation - (current - previous));
-        }
-
-        previous = current;
-    }
-
-    void Menu::_updateFilledRect(SDL_Rect & rect, Dimension dim)
-    {
-        rect.x = dim.x;
-        rect.y = dim.y;
-        rect.w = dim.w;
-        rect.h = dim.h;
-    }
-
-    void Menu::_renderFilledRect(SDL_Rect & rect, int rgba[4])
-    {
-        SDL_SetRenderDrawColor(_renderer, rgba[0], rgba[1], rgba[2], rgba[3]);
-        SDL_RenderFillRect(_renderer, &rect);
-    }
+void Menu::_renderFilledRect(SDL_Rect &rect, int rgba[4])
+{
+    SDL_SetRenderDrawColor(_renderer, rgba[0], rgba[1], rgba[2], rgba[3]);
+    SDL_RenderFillRect(_renderer, &rect);
+}

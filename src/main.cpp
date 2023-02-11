@@ -1,37 +1,25 @@
 // Support Code written by Michael D. Shah
-//
+// Author: Ruidi Huang
+// Course: CS5850 Building Game Engines
 // You can modify this could however you like in order to implement your 'pong'
 //
 // Last Updated: 01/17/23
 // Please do not redistribute without asking permission.
 
-
-// ==================== Libraries ==================
-// Depending on the operating system we use
-// The paths to SDL are actually different.
-// The #define statement should be passed in
-// when compiling using the -D argument.
-// This gives an example of how a programmer
-// may support multiple platforms with different
-// dependencies.
 #if defined(LINUX) || defined(MINGW)
 	#include <SDL2/SDL.h>
 #else
-	// Windows and Mac use a different path
-	// If you have compilation errors, change this as needed.
 	#include <SDL.h>
 #endif
 
 #include "GameModel.hpp"
 
-// Our entry point into our program.
-// Remember, C++ programs have exactly one entry point
-// where the program starts.
 int main(int argc, char* args[])
 {
-	
+	// Create Game	
 	GameModel model(1280, 1024);
 
+	// Run Game
 	model.Run();
 
 	return 0;

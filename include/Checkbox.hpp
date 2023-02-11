@@ -10,7 +10,6 @@
 #endif
 
 #include <string>
-
 #include "Configuration.hpp"
 
 class Checkbox
